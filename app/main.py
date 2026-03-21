@@ -16,7 +16,9 @@ def main():
 
     data = connection.recv(1024)
 
-    correlation_id = struct.unpack(">i", data[4:8])[0]
+    print(data)
+
+    correlation_id = struct.unpack(">i", data[8:12])[0]
     
     response = KafkaResponse(message_size=0, correlation_id=correlation_id)
         
