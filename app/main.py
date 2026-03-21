@@ -11,10 +11,6 @@ class KafkaResponse:
         return struct.pack(">ii", self.message_size, self.correlation_id)
 
 def main():
-    # You can use print statements as follows for debugging,
-    # they'll be visible when running tests.
-    print("Logs from your program will appear here!")
-
     server = socket.create_server(("localhost", 9092), reuse_port=True)
     connection, addr = server.accept() # wait for client
     
