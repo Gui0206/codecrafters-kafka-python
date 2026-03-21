@@ -24,14 +24,7 @@ def main():
 
     int_id = int.from_bytes(correlation_id, byteorder='big')
 
-    print('header')
-    print(header)
-    print('-----')
-    print('client')
-    print(client)
-    print('-----')
-    print('body')
-    print(body)
+    print('correlation_id')
 
     
     response = KafkaResponse(message_size=0, correlation_id=int_id)
