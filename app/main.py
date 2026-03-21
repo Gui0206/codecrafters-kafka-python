@@ -14,20 +14,11 @@ def main():
     server = socket.create_server(("localhost", 9092), reuse_port=True)
     connection, addr = server.accept() # wait for client
 
-    req_parse = connection.recv(1024)
-    header, client, body  = req_parse.split()
+    data = connection.recv(1024)
 
-    #message_size = header[:5]
-    request_api_key = header[5:7]
-    request_api_version = header[6:9]
-    correlation_id = header[9:11]
-
-    int_id = int.from_bytes(correlation_id, byteorder='big')
-
-    print('correlation_id')
-
+    correlation_id = struct.unpack(">i", data[4:8])[0]
     
-    response = KafkaResponse(message_size=0, correlation_id=int_id)
+    response = KafkaResponse(message_size=0, correlation_id=correlation_id)
         
     connection.sendall(response.to_bytes())
 
