@@ -11,7 +11,7 @@ class KafkaResponse:
     error_code: int
 
     def to_bytes(self):
-        return struct.pack(">iii", self.message_size, self.correlation_id, self.error_code)
+        return struct.pack(">iih", self.message_size, self.correlation_id, self.error_code)
 
 def main():
     server = socket.create_server(("localhost", 9092), reuse_port=True)
@@ -31,7 +31,7 @@ def main():
     if request_api_version not in supported_api_versions:
         error_code = 35
     else:
-        error_code = 3
+        error_code = 0
 
     #error_code = struct.unpack(">i", data[])
     
