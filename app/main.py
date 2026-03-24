@@ -26,7 +26,7 @@ def main():
     print(correlation_id)
 
     request_api_version = struct.unpack(">h", data[6:8])[0]
-    if request_api_version not in supported_api_versions:
+    if request_api_version not in supp_broker_api_versions:
         error_code = 35
     else:
         error_code = 0
