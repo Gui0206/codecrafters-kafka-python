@@ -31,7 +31,7 @@ def main():
     if request_api_version not in supported_api_versions:
         error_code = 35
     else:
-        error_code = 0
+        error_code = 3
 
     #error_code = struct.unpack(">i", data[])
     
