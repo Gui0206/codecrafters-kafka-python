@@ -24,9 +24,11 @@ def main():
 
     print(correlation_id)
 
+    supported_api_versions = [0,1,2,3,4]
+
     request_api_version = struct.unpack(">h", data[6:8])[0]
     print(request_api_version)
-    if request_api_version not in [0,1,2,3,4]:
+    if request_api_version not in supported_api_versions:
         error_code = 35
     else:
         error_code = 0
