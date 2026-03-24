@@ -26,7 +26,11 @@ def main():
     print(correlation_id)
 
     request_api_version = struct.unpack(">h", data[6:8])[0]
-    error_code = 0 if request_api_version not in supp_broker_api_versions else 35
+
+    if request_api_version not in supp_broker_api_versions:
+        error_code = 35
+    else:
+        error_code = 0
     
     response = KafkaResponse(message_size=0, correlation_id=correlation_id, error_code=error_code)
     connection.sendall(response.to_bytes())
