@@ -13,9 +13,16 @@ class KafkaResponse:
     request_api_key: int
     request_api_version: int
 
+
+
     def to_bytes(self):
-        self.message_size = len(struct.pack(">hhih", self.request_api_key, self.request_api_version, self.correlation_id, self.error_code))
-        return struct.pack(">ihhih", self.message_size, self.request_api_key, self.request_api_version, self.correlation_id, self.error_code)
+        #self.message_size = len(struct.pack(">hhih", self.request_api_key, self.request_api_version, self.correlation_id, self.error_code))
+        #return struct.pack(">ihhih", self.message_size, self.request_api_key, self.request_api_version, self.correlation_id, self.error_code)
+
+        message = struct.pack(">hhih", self.request_api_key, self.request_api_version, self.correlation_id, self.error_code)
+        self.message_size = len(message)
+        return struct.pack(">i", self.message_size) + message
+    
 
 def main():
     server = socket.create_server(("localhost", 9092), reuse_port=True)
