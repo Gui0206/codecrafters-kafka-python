@@ -7,11 +7,12 @@ supp_broker_api_versions = [0,1,2,3,4]
 
 @dataclass
 class KafkaResponse:
-    message_size: int
+    #message_size: int
     correlation_id: int
     error_code: int
 
     def to_bytes(self):
+        self.message_size = len(struct.pack(">ih", self.correlation_id, self.error_code))
         return struct.pack(">iih", self.message_size, self.correlation_id, self.error_code)
 
 def main():
@@ -31,9 +32,12 @@ def main():
         error_code = 35
     else:
         error_code = 0
-    
-    response = KafkaResponse(message_size=0, correlation_id=correlation_id, error_code=error_code)
+        
+    response = KafkaResponse(correlation_id=correlation_id, error_code=error_code)
     connection.sendall(response.to_bytes())
 
 if __name__ == "__main__":
     main()
+
+# first test: message_size
+# message_size = numero de bytes depois do message_size
