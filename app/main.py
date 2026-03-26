@@ -14,7 +14,7 @@ class KafkaResponse:
     request_api_version: int
 
     def to_bytes(self):
-        self.message_size = len(struct.pack(">ih", self.correlation_id, self.error_code))
+        self.message_size = len(struct.pack(">hhih", self.request_api_key, self.request_api_version, self.correlation_id, self.error_code))
         return struct.pack(">ihhih", self.message_size, self.request_api_key, self.request_api_version, self.correlation_id, self.error_code)
 
 def main():
