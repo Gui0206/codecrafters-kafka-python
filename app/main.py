@@ -16,10 +16,11 @@ class KafkaResponse:
         message = b''
         message += struct.pack(">i", self.correlation_id)
         message += struct.pack(">h", self.error_code)
-        message += struct.pack(">h", self.request_api_version)
+        message += struct.pack(">h", self.request_api_version) 
+        message += self.api_arr
 
         self.message_size = len(message)
-        return struct.pack(">i", self.message_size) + message + self.api_arr
+        return struct.pack(">i", self.message_size) + message
     
 def construct_api_arr(api_keys):
     api_arr = b''
