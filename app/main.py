@@ -10,6 +10,7 @@ class KafkaResponse:
     correlation_id: int
     error_code: int
     request_api_version: int
+    api_arr: bytes
 
     def to_bytes(self):
         message = b''
@@ -18,15 +19,18 @@ class KafkaResponse:
         message += struct.pack(">h", self.request_api_version)
 
         self.message_size = len(message)
-        return struct.pack(">i", self.message_size) + message
+        return struct.pack(">i", self.message_size) + message + self.api_arr
     
 def construct_api_arr(api_keys):
     api_arr = b''
     arr_len = len(api_keys)
-    api_arr += arr_len + 1
+    api_arr += (arr_len + 1).to_bytes(1, byteorder="big")
 
     for api_key, min_version, max_version in api_keys:
-        api_arr += (api_key, min_version, max_version)
+        api_arr += (
+            api_key.to_bytes(2, byteorder="big") + min_version.to_bytes(2, byteorder="big") + max_version.to_bytes(2, byteorder="big") + b"\x00"
+            )
+    return api_arr
 
 def main():
     server = socket.create_server(("localhost", 9092), reuse_port=True)
@@ -49,9 +53,12 @@ def main():
     api_key = struct.unpack(">h", data[4:6])[0]
     min_support_version = 0
     max_support_version = 4
-    tag_buffer = 0
 
-    response = KafkaResponse(request_api_version = 0, correlation_id=correlation_id, error_code=error_code)
+    #print(construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)]))
+    api_arr = construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)])
+
+
+    response = KafkaResponse(request_api_version = 0, correlation_id=correlation_id, error_code=error_code, api_arr=api_arr)
     connection.sendall(response.to_bytes())
 
 if __name__ == "__main__":
