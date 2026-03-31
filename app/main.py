@@ -11,6 +11,7 @@ class KafkaResponse:
     error_code: int
     request_api_version: int
     api_arr: bytes
+    throttle: int
 
     def to_bytes(self):
         message = b''
@@ -18,6 +19,8 @@ class KafkaResponse:
         message += struct.pack(">h", self.error_code)
         message += struct.pack(">h", self.request_api_version) 
         message += self.api_arr
+        message += struct.pack(">i", self.throttle)
+        message += b"\x00"
 
         self.message_size = len(message)
         return struct.pack(">i", self.message_size) + message
@@ -58,8 +61,9 @@ def main():
     #print(construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)]))
     api_arr = construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)])
 
+    throttle = 0
 
-    response = KafkaResponse(request_api_version = 0, correlation_id=correlation_id, error_code=error_code, api_arr=api_arr)
+    response = KafkaResponse(request_api_version = 0, correlation_id=correlation_id, error_code=error_code, api_arr=api_arr, throttle=throttle)
     connection.sendall(response.to_bytes())
 
 if __name__ == "__main__":
