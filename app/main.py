@@ -15,19 +15,11 @@ class KafkaResponse:
     def to_bytes(self):
         message = b''
         message += struct.pack(">i", self.correlation_id)
-        print(message)
-
         message += struct.pack(">h", self.error_code)
-        print(message)
         message += self.api_arr
-        print(message)
         message += struct.pack(">i", self.throttle)
-        print(message)
         message += b"\x00"
-        print(message)
         self.message_size = len(message)
-        print(message)
-        print(struct.pack(">i", self.message_size) + message)
         return struct.pack(">i", self.message_size) + message
     
 def construct_api_arr(api_keys):
@@ -46,11 +38,8 @@ def main():
     connection, addr = server.accept() # wait for client
     data = connection.recv(1024)
 
-
     correlation_id = struct.unpack(">i", data[8:12])[0]
-
     request_api_version = struct.unpack(">h", data[6:8])[0]
-
 
     if request_api_version not in supp_broker_api_versions:
         error_code = 35
@@ -61,8 +50,6 @@ def main():
     min_support_version = 0
     max_support_version = 4
 
-
-    #print(construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)]))
     api_arr = construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)])
 
     throttle = 0
