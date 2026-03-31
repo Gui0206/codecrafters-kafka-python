@@ -2,7 +2,11 @@ import socket
 import struct
 from dataclasses import dataclass
 
-supp_broker_api_versions = [0,1,2,3,4]
+HOST = "localhost"
+PORT = 9092
+SUPPORTED_API_VERSIONS = [0,1,2,3,4]
+ERROR_UNSUPPORTED_VERSION = 35
+ERROR_NONE = 0
 
 @dataclass
 class KafkaRequest:
@@ -11,7 +15,11 @@ class KafkaRequest:
     correlation_id: int
 
     @classmethod
-    def from_bytes()
+    def from_bytes(cls, data: bytes):
+        api_key = struct.unpack(">h", data[4:6])[0]
+        api_version = struct.unpack(">h", data[6:8])[0]
+        correlation_id = struct.unpack(">i", data[8:12])[0]
+        return cls(api_key, api_version, correlation_id)
 
 
 @dataclass
@@ -43,27 +51,25 @@ def construct_api_arr(api_keys):
     return api_arr
 
 def main():
-    server = socket.create_server(("localhost", 9092), reuse_port=True)
+    server = socket.create_server((HOST, PORT), reuse_port=True)
     connection, addr = server.accept() # wait for client
     data = connection.recv(1024)
 
-    correlation_id = struct.unpack(">i", data[8:12])[0]
-    request_api_version = struct.unpack(">h", data[6:8])[0]
+    request = KafkaRequest.from_bytes(data)
 
-    if request_api_version not in supp_broker_api_versions:
-        error_code = 35
+    if request.api_version not in SUPPORTED_API_VERSIONS:
+        error_code = ERROR_UNSUPPORTED_VERSION
     else:
-        error_code = 0
+        error_code = ERROR_NONE
 
-    api_key = struct.unpack(">h", data[4:6])[0]
     min_support_version = 0
     max_support_version = 4
 
-    api_arr = construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)])
+    api_arr = construct_api_arr(api_keys=[(request.api_key, min_support_version, max_support_version)])
 
     throttle = 0
 
-    response = KafkaResponse(correlation_id=correlation_id, error_code=error_code, api_arr=api_arr, throttle=throttle)
+    response = KafkaResponse(correlation_id=request.correlation_id, error_code=error_code, api_arr=api_arr, throttle=throttle)
     connection.sendall(response.to_bytes())
 
 if __name__ == "__main__":
