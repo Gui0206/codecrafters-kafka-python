@@ -4,6 +4,15 @@ from dataclasses import dataclass
 
 supp_broker_api_versions = [0,1,2,3,4]
 
+@dataclass
+class KafkaRequest:
+    api_key: int
+    api_version: int
+    correlation_id: int
+
+    @classmethod
+    def from_bytes()
+
 
 @dataclass
 class KafkaResponse:
