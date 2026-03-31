@@ -9,20 +9,25 @@ supp_broker_api_versions = [0,1,2,3,4]
 class KafkaResponse:
     correlation_id: int
     error_code: int
-    request_api_version: int
     api_arr: bytes
     throttle: int
 
     def to_bytes(self):
         message = b''
         message += struct.pack(">i", self.correlation_id)
-        message += struct.pack(">h", self.error_code)
-        message += struct.pack(">h", self.request_api_version) 
-        message += self.api_arr
-        message += struct.pack(">i", self.throttle)
-        message += b"\x00"
+        print(message)
 
+        message += struct.pack(">h", self.error_code)
+        print(message)
+        message += self.api_arr
+        print(message)
+        message += struct.pack(">i", self.throttle)
+        print(message)
+        message += b"\x00"
+        print(message)
         self.message_size = len(message)
+        print(message)
+        print(struct.pack(">i", self.message_size) + message)
         return struct.pack(">i", self.message_size) + message
     
 def construct_api_arr(api_keys):
@@ -41,13 +46,11 @@ def main():
     connection, addr = server.accept() # wait for client
     data = connection.recv(1024)
 
-    print(data)
 
     correlation_id = struct.unpack(">i", data[8:12])[0]
 
     request_api_version = struct.unpack(">h", data[6:8])[0]
 
-    print(request_api_version)
 
     if request_api_version not in supp_broker_api_versions:
         error_code = 35
@@ -58,12 +61,13 @@ def main():
     min_support_version = 0
     max_support_version = 4
 
+
     #print(construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)]))
     api_arr = construct_api_arr(api_keys=[(api_key, min_support_version, max_support_version)])
 
     throttle = 0
 
-    response = KafkaResponse(request_api_version = 0, correlation_id=correlation_id, error_code=error_code, api_arr=api_arr, throttle=throttle)
+    response = KafkaResponse(correlation_id=correlation_id, error_code=error_code, api_arr=api_arr, throttle=throttle)
     connection.sendall(response.to_bytes())
 
 if __name__ == "__main__":
