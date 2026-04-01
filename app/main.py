@@ -40,7 +40,7 @@ class KafkaResponse:
         return struct.pack(">i", self.message_size) + message
     
 class ApiVersionHandler:
-    def handler(self, request: KafkaRequest) -> KafkaResponse:
+    def handle(self, request: KafkaRequest) -> KafkaResponse:
         if request.api_version not in SUPPORTED_API_VERSIONS:
             error_code = ERROR_UNSUPPORTED_VERSION
         else:
