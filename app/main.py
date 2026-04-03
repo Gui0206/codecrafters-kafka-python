@@ -71,18 +71,27 @@ class ApiVersionHandler:
                 api_key.to_bytes(2, byteorder="big") + min_version.to_bytes(2, byteorder="big") + max_version.to_bytes(2, byteorder="big") + b"\x00"
                 )
         return api_arr
+    
+class KafkaServer:
+    def __init__ (self, host, port, handler):
+        self.host = host
+        self.port = port
+        self.handler = handler
 
+    def start(self):
+        with socket.create_server((self.host, self.port), reuse_port=True) as server:
+            connection, addr = server.accept()
+            with connection:
+                data = connection.recv(1024)
+                if data:
+                   request = KafkaRequest.from_bytes(data) 
+                   response = self.handler.handle(request)
+                   connection.sendall(response.to_bytes())
+                    
 def main():
-    server = socket.create_server((HOST, PORT), reuse_port=True)
-    connection, addr = server.accept() # wait for client
-    data = connection.recv(1024)
-
-    request = KafkaRequest.from_bytes(data)
-
     handler = ApiVersionHandler()
-    response = handler.handle(request)
-
-    connection.sendall(response.to_bytes())
+    server = KafkaServer(HOST, PORT, handler)
+    server.start()
 
 if __name__ == "__main__":
     main()
