@@ -61,7 +61,7 @@ class ApiVersionHandler:
             throttle=throttle
         )
 
-    def _construct_api_arr(api_keys):
+    def _construct_api_arr(self, api_keys):
         api_arr = b''
         arr_len = len(api_keys)
         api_arr += (arr_len + 1).to_bytes(1, byteorder="big")
