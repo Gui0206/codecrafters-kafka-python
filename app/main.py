@@ -82,11 +82,12 @@ class KafkaServer:
         with socket.create_server((self.host, self.port), reuse_port=True) as server:
             connection, addr = server.accept()
             with connection:
-                data = connection.recv(1024)
-                if data:
-                   request = KafkaRequest.from_bytes(data) 
-                   response = self.handler.handle(request)
-                   connection.sendall(response.to_bytes())
+                while True:
+                    data = connection.recv(1024)
+                    if data:
+                        request = KafkaRequest.from_bytes(data) 
+                        response = self.handler.handle(request)
+                        connection.sendall(response.to_bytes())
                     
 def main():
     handler = ApiVersionHandler()
