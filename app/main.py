@@ -1,6 +1,7 @@
 import socket
 import struct
 from dataclasses import dataclass
+import threading
 
 HOST = "localhost"
 PORT = 9092
@@ -80,14 +81,25 @@ class KafkaServer:
 
     def start(self):
         with socket.create_server((self.host, self.port), reuse_port=True) as server:
-            connection, addr = server.accept()
-            with connection:
-                while True:
+            while True:
+                connection, addr = server.accept()
+                client_thread = threading.Thread(target=self._handle_client, args=(connection, addr))
+                client_thread.start()
+            
+    def _handle_client(self, connection, addr):
+        with connection:
+            while True:
+                try:
                     data = connection.recv(1024)
-                    if data:
-                        request = KafkaRequest.from_bytes(data) 
-                        response = self.handler.handle(request)
-                        connection.sendall(response.to_bytes())
+                    if not data:
+                        break
+
+                    request = KafkaRequest.from_bytes(data) 
+                    response = self.handler.handle(request)
+                    connection.sendall(response.to_bytes())
+
+                except Exception as e:
+                    break         
                     
 def main():
     handler = ApiVersionHandler()
